@@ -1,9 +1,12 @@
 package com.cg;
 
+import java.time.LocalDate;
+
 public class EmployeePayrollData {
 	private int id;
 	private String name;
 	private double salary;
+	private LocalDate startDate;
 
 	public EmployeePayrollData(Integer id, String name, Double salary) {
 		this.id = id;
@@ -11,6 +14,10 @@ public class EmployeePayrollData {
 		this.salary = salary;
 	}
 
+	public EmployeePayrollData(Integer id, String name, Double salary, LocalDate startDate) {
+		this(id,name,salary);
+		this.setStartDate(startDate);
+	}
 	public double getSalary() {
 		return salary;
 	}
@@ -35,8 +42,26 @@ public class EmployeePayrollData {
 		this.id = id;
 	}
 
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+	
 	@Override
 	public String toString() {
-		return "id= " + id + ", name= " + name + ", salary= " + salary;
+		return "id="+id+", name="+name+", salary="+salary+", startDate="+startDate;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(o == null || getClass() != o.getClass()) return false;
+		EmployeePayrollData that = (EmployeePayrollData)o;
+		return id == that.id && 
+				Double.compare(that.salary, salary) == 0 &&
+				name.contentEquals(that.name);
 	}
 }

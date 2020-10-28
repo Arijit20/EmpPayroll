@@ -36,6 +36,12 @@ public class EmpPayrollService {
 			new EmployeePayrollFileIOService().readData();
 		}
 	}
+	
+	public List<EmployeePayrollData> readEmpPayrollData(IOService ioService) throws EmpPayrollException {
+		if (ioService.equals(IOService.DB_IO))
+			employeePayrollList = new EmployeePayrollDBService().readData();
+		return employeePayrollList;
+	}
 
 	public void writeEmpPayrollData(IOService ioService) {
 		if (ioService.equals(IOService.CONSOLE_IO))
