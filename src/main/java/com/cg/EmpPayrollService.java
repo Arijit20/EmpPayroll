@@ -62,4 +62,28 @@ public class EmpPayrollService {
 		return 0;
 	}
 
+	public void updateEmployeeSalary(String name, double salary) throws EmpPayrollException {
+		// TODO Auto-generated method stub
+		int result = new EmployeePayrollDBService().updateEmployeeData(name, salary);
+		if(result == 0)return;
+		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
+		if(employeePayrollData != null)employeePayrollData.setSalary(salary);
+	}
+
+	private EmployeePayrollData getEmployeePayrollData(String name) {
+		// TODO Auto-generated method stub
+		EmployeePayrollData employeePayrollData;
+		employeePayrollData = this.employeePayrollList.stream()
+				.filter(employee -> employee.getName().contentEquals(name))
+				.findFirst()
+				.orElse(null);
+		return employeePayrollData;
+	}
+
+	public boolean checkEmployeePayrollInSyncWithDB(String name) throws EmpPayrollException {
+		// TODO Auto-generated method stub
+		EmployeePayrollData employeePayrollData = new EmployeePayrollDBService().getEmployeePayrollData(name);
+		return employeePayrollData.getSalary().equals(getEmployeePayrollData(name).getSalary());
+	}
+
 }

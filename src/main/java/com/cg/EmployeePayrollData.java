@@ -18,7 +18,7 @@ public class EmployeePayrollData {
 		this(id,name,salary);
 		this.setStartDate(startDate);
 	}
-	public double getSalary() {
+	public Double getSalary() {
 		return salary;
 	}
 
