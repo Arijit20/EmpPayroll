@@ -2,15 +2,27 @@ package com.cg;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EmployeePayrollDBService {
+	
+	private static EmployeePayrollDBService employeePayrollDBService;
+	private PreparedStatement employeePayrollDataStatement;
+	
+	private EmployeePayrollDBService() {
+	}
+	
+	public static EmployeePayrollDBService getInstance() {
+		if(employeePayrollDBService == null)
+			employeePayrollDBService = new EmployeePayrollDBService();
+		return employeePayrollDBService;
+	}
 
 	private Connection getConnection() throws SQLException {
 		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?allowPublicKeyRetrieval=true&&useSSL=false";
@@ -27,13 +39,7 @@ public class EmployeePayrollDBService {
 		try(Connection connection = this.getConnection()){
 			Statement statement = connection.createStatement();
 			ResultSet result = statement.executeQuery(sql);
-			while(result.next()) {
-				int id = result.getInt("id");
-				String name = result.getString("name");
-				double salary = result.getDouble("salary");
-				LocalDate startDate = result.getDate("start").toLocalDate();
-				employeePayrollList.add(new EmployeePayrollData(id,name,salary,startDate));
-			}
+			employeePayrollList = getEmployeePayrollData(result);
 		}catch(SQLException e) {
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
 		}
@@ -56,16 +62,44 @@ public class EmployeePayrollDBService {
 		}
 	}
 
-	public EmployeePayrollData getEmployeePayrollData(String name) throws EmpPayrollException {
-		// TODO Auto-generated method stub
-		
-			List<EmployeePayrollData> employeePayrollList = this.readData();
-			EmployeePayrollData employeeData = employeePayrollList.stream()
-					.filter(employee -> employee.getName().contentEquals(name))
-					.findFirst()
-					.orElse(null);
-			return employeeData;
-		
-		
+	public List<EmployeePayrollData> getEmployeePayrollData(String name) throws EmpPayrollException{
+		List<EmployeePayrollData> employeePayrollList = null;
+		if(this.employeePayrollDataStatement == null)
+			this.prepareStatementForEmployeeData();
+		try {
+			employeePayrollDataStatement.setString(1, name);
+			ResultSet resultSet = employeePayrollDataStatement.executeQuery();
+			employeePayrollList = this.getEmployeePayrollData(resultSet);
+		}catch(SQLException e) {
+			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
 		}
+		return 	employeePayrollList;
+		}
+	
+	private void prepareStatementForEmployeeData() throws EmpPayrollException {
+		// TODO Auto-generated method stub
+		try {
+			Connection connection = this.getConnection();
+			String sql = "SELECT * FROM employee_data WHERE name = ?";
+			employeePayrollDataStatement = connection.prepareStatement(sql);
+		}catch(SQLException e) {
+			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+		}
+	}
+
+	private List<EmployeePayrollData> getEmployeePayrollData(ResultSet result) throws EmpPayrollException{
+		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
+		try {
+			while(result.next()) {
+				int id = result.getInt("id");
+				String name = result.getString("name");
+				double salary = result.getDouble("salary");
+				LocalDate startDate = result.getDate("start").toLocalDate();
+				employeePayrollList.add(new EmployeePayrollData(id,name,salary,startDate));
+		}
+		}catch(SQLException e) {
+			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+		}
+		return employeePayrollList;
+	}
 }
