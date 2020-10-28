@@ -1,6 +1,7 @@
 package com.cg;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +63,7 @@ public class EmployeePayrollDBService {
 		}
 	}
 
-	public List<EmployeePayrollData> getEmployeePayrollData(String name) throws EmpPayrollException{
+/*	public List<EmployeePayrollData> getEmployeePayrollData(String name) throws EmpPayrollException{
 		List<EmployeePayrollData> employeePayrollList = null;
 		if(this.employeePayrollDataStatement == null)
 			this.prepareStatementForEmployeeData();
@@ -74,6 +75,18 @@ public class EmployeePayrollDBService {
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
 		}
 		return 	employeePayrollList;
+		}*/
+	public EmployeePayrollData getEmployeePayrollData(String name) throws EmpPayrollException {
+		// TODO Auto-generated method stub
+		
+			List<EmployeePayrollData> employeePayrollList = this.readData();
+			EmployeePayrollData employeeData = employeePayrollList.stream()
+					.filter(employee -> employee.getName().contentEquals(name))
+					.findFirst()
+					.orElse(null);
+			return employeeData;
+		
+		
 		}
 	
 	private void prepareStatementForEmployeeData() throws EmpPayrollException {
@@ -99,6 +112,24 @@ public class EmployeePayrollDBService {
 		}
 		}catch(SQLException e) {
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+		}
+		return employeePayrollList;
+	}
+
+	public List<EmployeePayrollData> getEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) {
+		// TODO Auto-generated method stub
+		String sql = String.format("SELECT * FROM employee_data WHERE start BETWEEN '%s' AND '%s';",
+				Date.valueOf(startDate), Date.valueOf(endDate));
+		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
+		try (Connection connection = getConnection()) {
+			employeePayrollDataStatement = connection.prepareStatement(sql);
+			ResultSet resultSet = employeePayrollDataStatement.executeQuery();
+			while (resultSet.next()) {
+				employeePayrollList.add(new EmployeePayrollData(resultSet.getInt("id"), resultSet.getString("name"),
+						resultSet.getDouble("salary"), resultSet.getDate("start").toLocalDate()));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return employeePayrollList;
 	}

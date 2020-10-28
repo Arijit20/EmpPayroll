@@ -1,5 +1,6 @@
 package com.cg;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -81,10 +82,20 @@ public class EmpPayrollService {
 		
 	}
 
-	public boolean checkEmployeePayrollInSyncWithDB(String name) throws EmpPayrollException {
+	/*public boolean checkEmployeePayrollInSyncWithDB(String name) throws EmpPayrollException {
 		// TODO Auto-generated method stub
 		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeePayrollData(name);
 		return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
+	}*/
+	public boolean checkEmployeePayrollInSyncWithDB(String name) throws EmpPayrollException {
+		// TODO Auto-generated method stub
+		EmployeePayrollData employeePayrollData = employeePayrollDBService.getEmployeePayrollData(name);
+		return employeePayrollData.getSalary().equals(getEmployeePayrollData(name).getSalary());
+	}
+
+	public List<EmployeePayrollData> getEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) {
+		// TODO Auto-generated method stub
+		return employeePayrollDBService.getEmployeePayrollDataForDateRange(startDate, endDate);
 	}
 
 }
