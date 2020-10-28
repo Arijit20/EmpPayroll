@@ -93,9 +93,22 @@ public class EmpPayrollService {
 		return employeePayrollData.getSalary().equals(getEmployeePayrollData(name).getSalary());
 	}
 
-	public List<EmployeePayrollData> getEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) {
+	public List<EmployeePayrollData> getEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) throws EmpPayrollException {
 		// TODO Auto-generated method stub
 		return employeePayrollDBService.getEmployeePayrollDataForDateRange(startDate, endDate);
+	}
+
+	public double getSumByGender(IOService ioService, String c) throws EmpPayrollException {
+		double sum = 0.0;
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getSumByGender(c);
+		return sum;
+	}
+	
+	public double getEmpDataGroupedByGender(IOService ioService,String column, String operation, String gender) throws EmpPayrollException {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getEmpDataGroupedByGender(column, operation, gender);
+		return 0.0;
 	}
 
 }
