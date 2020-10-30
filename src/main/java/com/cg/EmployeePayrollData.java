@@ -1,6 +1,7 @@
 package com.cg;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class EmployeePayrollData {
 	private int id;
@@ -8,6 +9,7 @@ public class EmployeePayrollData {
 	private double salary;
 	private LocalDate startDate;
 	private String gender;
+	private List<String> deptList;
 
 	public EmployeePayrollData(Integer id, String name, Double salary) {
 		this.id = id;
@@ -23,6 +25,11 @@ public class EmployeePayrollData {
 	public EmployeePayrollData(Integer id, String name, Double salary, LocalDate startDate,String gender) {
 		this(id,name,salary, startDate);
 		this.setGender(gender);
+	}
+	
+	public EmployeePayrollData(Integer id, String name, Double salary, LocalDate startDate,String gender, List<String> deptList) {
+		this(id,name,salary, startDate, gender);
+		this.setDeptList(deptList);
 	}
 	public Double getSalary() {
 		return salary;
@@ -55,6 +62,23 @@ public class EmployeePayrollData {
 	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
+
+	public String getGender() {
+		return gender;
+	}
+	
+	
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public List<String> getDeptList() {
+		return deptList;
+	}
+
+	public void setDeptList(List<String> deptList) {
+		this.deptList = deptList;
+	}
 	
 	@Override
 	public String toString() {
@@ -68,15 +92,7 @@ public class EmployeePayrollData {
 		EmployeePayrollData that = (EmployeePayrollData)o;
 		return id == that.id && 
 				Double.compare(that.salary, salary) == 0 &&
-				name.contentEquals(that.name);
+				name.contentEquals(that.name) && this.gender.contentEquals(that.gender) && this.deptList.equals(that.deptList);
 	}
 
-	public String getGender() {
-		return gender;
-	}
-	
-	
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
 }
