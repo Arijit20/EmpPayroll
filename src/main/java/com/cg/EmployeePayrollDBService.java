@@ -208,7 +208,7 @@ public class EmployeePayrollDBService {
 		return employeePayrollData;
 	}
 
-	public EmployeePayrollData addEmpToPayroll(String name, double salary, LocalDate start, String gender) throws EmpPayrollException {
+	public EmployeePayrollData addEmpToPayroll(String name, double salary, LocalDate start, String gender, List<String> deptList) throws EmpPayrollException {
 		// TODO Auto-generated method stub
 		int id = -1;
 		EmployeePayrollData employeePayrollData = null;
@@ -236,6 +236,23 @@ public class EmployeePayrollDBService {
 			}
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
 		}
+		
+		try (Statement statement = connection.createStatement()) {
+			String sql = String.format("INSERT INTO employee_dept (id,dept) VALUES ('%s','%s');", id,
+					deptList);
+			int rowAffected = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = statement.getGeneratedKeys();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+				return employeePayrollData;
+			} catch (SQLException e1) {
+				throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+			}
+		}
 		try(Statement statement = connection.createStatement()){
 			double deductions = salary * 0.2;
 			double taxablePay = salary - deductions;
@@ -256,6 +273,7 @@ public class EmployeePayrollDBService {
 				throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
 			}
 		}
+		
 		try {
 		connection.commit();
 		}catch(SQLException e) {

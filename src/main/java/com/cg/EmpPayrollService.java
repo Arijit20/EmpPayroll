@@ -114,8 +114,8 @@ public class EmpPayrollService {
 		return null;
 	}
 
-	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender) throws EmpPayrollException{
-		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender));
+	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender, List<String> deptList) throws EmpPayrollException{
+		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender, deptList));
 	}
 
 
