@@ -215,6 +215,7 @@ public class EmployeePayrollDBService {
 		Connection connection = null;
 		try {
 			connection = this.getConnection();
+			connection.setAutoCommit(false);
 		}catch(SQLException e) {
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
 		}
@@ -227,6 +228,12 @@ public class EmployeePayrollDBService {
 				if(resultSet.next()) id = resultSet.getInt(1);
 			}
 		}catch(SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+			}
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
 		}
 		try(Statement statement = connection.createStatement()){
@@ -241,7 +248,27 @@ public class EmployeePayrollDBService {
 			if(rowAffected == 1)
 				employeePayrollData = new EmployeePayrollData(id, name, salary, start, gender);
 		}catch(SQLException e) {
-			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
+			try {
+				connection.rollback();
+				return employeePayrollData;
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+			}
+		}
+		try {
+		connection.commit();
+		}catch(SQLException e) {
+			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+		}
+		finally {
+			if(connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+				}
 		}
 		return employeePayrollData;
 	}
