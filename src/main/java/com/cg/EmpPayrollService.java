@@ -118,5 +118,9 @@ public class EmpPayrollService {
 		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender, deptList));
 	}
 
+	public void remove(String name) throws EmpPayrollException {
+		employeePayrollDBService.remove(name);
+	}
+
 
 }

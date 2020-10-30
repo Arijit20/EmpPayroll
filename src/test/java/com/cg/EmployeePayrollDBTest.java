@@ -75,4 +75,13 @@ public class EmployeePayrollDBTest {
 		boolean result = empPayRollService.checkEmployeePayrollInSyncWithDB("Jeff");
 		Assert.assertTrue(result);
 	}
+	
+	@Test
+	public void givenEmployeeList_WhenDeleted_ShouldReturnProperCount() throws EmpPayrollException {
+		EmpPayrollService empPayRollService = new EmpPayrollService();
+		empPayRollService.readEmpPayrollData(IOService.DB_IO);
+		empPayRollService.remove("Jeff");
+		List<EmployeePayrollData> empPayrollList = empPayRollService.readEmpPayrollData(IOService.DB_IO);
+		Assert.assertEquals(4, empPayrollList.size());
+	}
 }

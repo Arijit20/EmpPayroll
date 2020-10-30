@@ -38,7 +38,7 @@ public class EmployeePayrollDBService {
 	}
 	
 	public List<EmployeePayrollData> readData() throws EmpPayrollException{
-		String sql = "SELECT * FROM employee_data;";
+		String sql = "SELECT * FROM employee_data WHERE status = 'active';";
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
 		try(Connection connection = this.getConnection()){
 			Statement statement = connection.createStatement();
@@ -57,7 +57,7 @@ public class EmployeePayrollDBService {
 
 	private int updateEmployeeDataUsingStatement(String name, double salary) throws EmpPayrollException {
 		// TODO Auto-generated method stub
-		String sql = String.format("update employee_data set salary = %.2f where name ='%s';", salary, name);
+		String sql = String.format("update employee_data set salary = %.2f where name ='%s' AND status = 'active';", salary, name);
 		try(Connection connection = this.getConnection()){
 			Statement statement = connection.createStatement();
 			return statement.executeUpdate(sql);
@@ -96,7 +96,7 @@ public class EmployeePayrollDBService {
 		// TODO Auto-generated method stub
 		try {
 			Connection connection = this.getConnection();
-			String sql = "SELECT * FROM employee_data WHERE name = ?";
+			String sql = "SELECT * FROM employee_data WHERE name = ? AND status = 'active'";
 			employeePayrollDataStatement = connection.prepareStatement(sql);
 		}catch(SQLException e) {
 			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
@@ -122,7 +122,7 @@ public class EmployeePayrollDBService {
 
 	public List<EmployeePayrollData> getEmployeePayrollDataForDateRange(LocalDate startDate, LocalDate endDate) throws EmpPayrollException {
 		// TODO Auto-generated method stub
-		String sql = String.format("SELECT * FROM employee_data WHERE start BETWEEN '%s' AND '%s';",
+		String sql = String.format("SELECT * FROM employee_data WHERE status = 'active' AND start BETWEEN '%s' AND '%s';",
 				Date.valueOf(startDate), Date.valueOf(endDate));
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
 		try (Connection connection = getConnection()) {
@@ -153,7 +153,7 @@ public class EmployeePayrollDBService {
 	public double getEmpDataGroupedByGender(String column, String operation, String gender) throws EmpPayrollException {
 		
 		Map<String, Double> sumByGenderMap = new HashMap<>();
-		String sql = String.format("SELECT gender, %s(%s) FROM employee_data GROUP BY gender;", operation, column);
+		String sql = String.format("SELECT gender, %s(%s) FROM employee_data WHERE status = 'active' GROUP BY gender;", operation, column);
 		try (Connection connection = getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
 			ResultSet resultSet = preparedStatement.executeQuery();
@@ -171,7 +171,7 @@ public class EmployeePayrollDBService {
 	
 	public Map<String, Double> getAvgSalaryByGender() throws EmpPayrollException  {
 		// TODO Auto-generated method stub
-		String sql ="SELECT gender, AVG(salary) as avg_salary FROM employee_data GROUP BY gender;";
+		String sql ="SELECT gender, AVG(salary) as avg_salary FROM employee_data WHERE status = 'active' GROUP BY gender;";
 		Map<String, Double> genderToAvgSalaryMap = new HashMap<>();
 		try (Connection connection = this.getConnection()){
 			Statement statement = connection.createStatement();
@@ -289,6 +289,16 @@ public class EmployeePayrollDBService {
 				}
 		}
 		return employeePayrollData;
+	}
+
+	public void remove(String name) throws EmpPayrollException {
+		String sql = String.format("UPDATE employee_data SET status = 'inactive' WHERE name = '%s';", name);
+		try (Connection connection = getConnection()) {
+			Statement statement = connection.createStatement();
+			statement.execute(sql);
+		} catch (SQLException e) {
+			throw new EmpPayrollException(EmpPayrollException.ExceptionType.INCORRECT_INFO, e.getMessage());
+		}
 	}
 
 }
