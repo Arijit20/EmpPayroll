@@ -3,6 +3,7 @@ package com.cg;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.cg.EmpPayrollService.IOService;
@@ -82,11 +83,6 @@ public class EmpPayrollService {
 		
 	}
 
-	/*public boolean checkEmployeePayrollInSyncWithDB(String name) throws EmpPayrollException {
-		// TODO Auto-generated method stub
-		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeePayrollData(name);
-		return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
-	}*/
 	public boolean checkEmployeePayrollInSyncWithDB(String name) throws EmpPayrollException {
 		// TODO Auto-generated method stub
 		EmployeePayrollData employeePayrollData = employeePayrollDBService.getEmployeePayrollData(name);
@@ -110,5 +106,17 @@ public class EmpPayrollService {
 			return employeePayrollDBService.getEmpDataGroupedByGender(column, operation, gender);
 		return 0.0;
 	}
+	
+	public Map<String, Double> readAvgSalary(IOService ioService) throws EmpPayrollException {
+		// TODO Auto-generated method stub
+		if(ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getAvgSalaryByGender();
+		return null;
+	}
+
+	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender) throws EmpPayrollException{
+		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender));
+	}
+
 
 }
