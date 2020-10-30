@@ -1,6 +1,7 @@
 package com.cg;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class EmployeePayrollDBTest {
 		double sum1 = empPayRollService.getEmpDataGroupedByGender(IOService.DB_IO, "salary", "SUM","F");
 		Assert.assertTrue(sum == sum1);
 	}
-	
+	@Ignore
 	@Test
 	public void givenDBFindAvgSalary_shouldReturnSum() throws EmpPayrollException {
 		EmpPayrollService empPayRollService = new EmpPayrollService();
@@ -65,9 +66,11 @@ public class EmployeePayrollDBTest {
 	
 	@Test
 	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws EmpPayrollException {
+		List<String> deptList = new ArrayList<>();
+		deptList.add("Sales");
 		EmpPayrollService empPayRollService = new EmpPayrollService();
 		empPayRollService.readEmpPayrollData(IOService.DB_IO);
-		empPayRollService.addEmpToPayroll("Jeff", 400.0, LocalDate.now(), "M");
+		empPayRollService.addEmpToPayroll("Jeff", 400.0, LocalDate.now(), "M", deptList);
 		boolean result = empPayRollService.checkEmployeePayrollInSyncWithDB("Jeff");
 		Assert.assertTrue(result);
 	}
