@@ -72,8 +72,8 @@ public class EmployeePayrollDBTest {
 		EmpPayrollService empPayRollService = new EmpPayrollService();
 		empPayRollService.readEmpPayrollData(IOService.DB_IO);
 		empPayRollService.addEmpToPayroll("Jeff", 400.0, LocalDate.now(), "M", deptList);
-		boolean result = empPayRollService.checkEmployeePayrollInSyncWithDB("Jeff");
-		Assert.assertTrue(result);
+		List<EmployeePayrollData> empPayrollList = empPayRollService.readEmpPayrollData(IOService.DB_IO);
+		Assert.assertEquals(5, empPayrollList.size());
 	}
 	
 	@Test
