@@ -64,7 +64,7 @@ public class EmpPayrollService {
 	public long countEntries(IOService ioService) {
 		if (ioService.equals(IOService.FILE_IO))
 			return new EmployeePayrollFileIOService().countEntries();
-		return 0;
+		return employeePayrollList.size();
 	}
 
 	public void updateEmployeeSalary(String name, double salary) throws EmpPayrollException {
@@ -120,6 +120,20 @@ public class EmpPayrollService {
 
 	public void remove(String name) throws EmpPayrollException {
 		employeePayrollDBService.remove(name);
+	}
+
+	public void addEmpToPayroll(List<EmployeePayrollData> empPayrollDataList) {
+		empPayrollDataList.forEach(empPayrollData -> {
+			System.out.println("Emp being Added : " + empPayrollData.getName());
+			try {
+				this.addEmpToPayroll(empPayrollData.getName(), empPayrollData.getSalary(), empPayrollData.getStartDate(),
+						empPayrollData.getGender(), empPayrollData.getDeptList());
+			} catch (EmpPayrollException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Emp Added : " + empPayrollData.getName());
+		});
+		System.out.println(this.employeePayrollList);
 	}
 
 
