@@ -60,6 +60,27 @@ public class EmployeePayrollDBService {
 		// TODO Auto-generated method stub
 		return this.updateEmployeeDataUsingStatement(name, salary);
 	}
+	
+	public void updateEmployeeSalaryInDB(String name, double salary)throws EmpPayrollException {
+		this.updateEmployeeDataUsingStatement(name, salary);
+	    this.updateEmployeePayroll(name, salary);
+	}
+	
+	private int updateEmployeePayroll(String name, double salary) throws EmpPayrollException {
+		double deductions = salary * 0.2;
+		double taxablePay = salary - deductions;
+		double tax = taxablePay * 0.1;
+		double netPay = salary - tax;
+		String sql = String.format("update payroll_details set basic_pay=%.2f, deductions=%.2f, taxable_pay= %.2f, "
+				                 + "tax=%.2f, net_pay=%.2f where id = (select id from employee_data where name='%s');",
+				                  salary, deductions, taxablePay, tax, netPay, name);
+		try(Connection connection = this.getConnection()){
+			Statement statement = connection.createStatement();
+			return statement.executeUpdate(sql);
+		}catch(SQLException e) {
+			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+		}
+	}
 
 	private int updateEmployeeDataUsingStatement(String name, double salary) throws EmpPayrollException {
 		// TODO Auto-generated method stub
