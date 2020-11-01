@@ -109,4 +109,16 @@ public class EmployeePayrollDBTest {
 		System.out.println("Duration with Thread : "+ Duration.between(threadStart, threadEnd));
 		Assert.assertEquals(7, empPayRollService.countEntries(IOService.DB_IO));
 	}
+	
+	@Test
+	public void givenMultipleEmployee_WhenUpdated_ShouldMatch() throws EmpPayrollException {
+		EmployeePayrollData[] arrOfEmps = {
+			new EmployeePayrollData(0, "Bill", 170.00),
+			new EmployeePayrollData(0, "Jeff", 400.00)
+		};
+		EmpPayrollService empPayRollService = new EmpPayrollService();
+		empPayRollService.readEmpPayrollData(IOService.DB_IO);
+		boolean result = empPayRollService.updateEmployeeSalaryInDB(Arrays.asList(arrOfEmps));
+		Assert.assertTrue(result);
+	}
 }
