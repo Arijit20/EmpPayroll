@@ -33,7 +33,9 @@ public class EmployeePayrollDBService {
 		String userName = "root";
 		String password = "arijit123dey";
 		Connection connection;
+		System.out.println("Connecting to database:"+ jdbcURL);
 		connection = DriverManager.getConnection(jdbcURL, userName, password);
+		System.out.println("Connection is successful"+ connection);
 		return connection;
 	}
 	
