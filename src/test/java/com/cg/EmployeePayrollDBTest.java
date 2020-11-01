@@ -58,7 +58,7 @@ public class EmployeePayrollDBTest {
 		double sum1 = empPayRollService.getEmpDataGroupedByGender(IOService.DB_IO, "salary", "SUM","F");
 		Assert.assertTrue(sum == sum1);
 	}
-	@Ignore
+	
 	@Test
 	public void givenDBFindAvgSalary_shouldReturnSum() throws EmpPayrollException {
 		EmpPayrollService empPayRollService = new EmpPayrollService();
@@ -103,6 +103,10 @@ public class EmployeePayrollDBTest {
 		empPayRollService.addEmpToPayroll(Arrays.asList(arrOfEmps));
 		Instant end = Instant.now();
 		System.out.println("Duration without Thread : "+ Duration.between(start, end));
-		Assert.assertEquals(4, empPayRollService.countEntries(IOService.DB_IO));
+		Instant threadStart = Instant.now();
+		empPayRollService.addEmpToPayrollWithThreads(Arrays.asList(arrOfEmps));
+		Instant threadEnd = Instant.now();
+		System.out.println("Duration with Thread : "+ Duration.between(threadStart, threadEnd));
+		Assert.assertEquals(7, empPayRollService.countEntries(IOService.DB_IO));
 	}
 }
