@@ -2,6 +2,7 @@ package com.cg;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -59,6 +60,7 @@ public class EmpPayrollService {
 	public void printData(IOService ioService) {
 		if (ioService.equals(IOService.FILE_IO))
 			new EmployeePayrollFileIOService().printData();
+		else System.out.println(employeePayrollList);
 	}
 
 	public long countEntries(IOService ioService) {
@@ -136,5 +138,33 @@ public class EmpPayrollService {
 		System.out.println(this.employeePayrollList);
 	}
 
+	public void addEmpToPayrollWithThreads(List<EmployeePayrollData> empPayrollDataList) throws EmpPayrollException {
+	    Map<Integer, Boolean> employeeStatusMap = new HashMap<Integer, Boolean>();
+	    empPayrollDataList.forEach(employeePayrollData -> {
+	    	employeeStatusMap.put(employeePayrollData.hashCode(), false);
+	      Runnable task = () -> {
+	    	  System.out.println("Employee Being Added : "+ Thread.currentThread().getName());
+	    	  try {
+				this.addEmpToPayroll(employeePayrollData.getName(), employeePayrollData.getSalary(), employeePayrollData.getStartDate(),
+						  employeePayrollData.getGender(), employeePayrollData.getDeptList());
+			} catch (EmpPayrollException e) {
+				e.printStackTrace();
+			}
+	    	  employeeStatusMap.put(employeePayrollData.hashCode(), true);
+	    	  System.out.println("Employee Added : "+ Thread.currentThread().getName());
+	    };
+	    Thread thread = new Thread(task, employeePayrollData.getName());
+	    thread.start();
+	    });
+	    while(employeeStatusMap.containsValue(false)) {
+	    	try{Thread.sleep(10);
+	    	}catch(InterruptedException e) {
+	    		throw new EmpPayrollException(EmpPayrollException.ExceptionType.THREAD_INTERRUPTION, e.getMessage());
+	    	}
+	    }
+	    System.out.println(this.employeePayrollList);
+	    }
+}	
 
-}
+
+
