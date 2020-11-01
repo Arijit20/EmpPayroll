@@ -1,5 +1,6 @@
 package com.cg;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,7 +122,11 @@ public class EmpPayrollService {
 
 	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender, List<String> deptList)
 			throws EmpPayrollException {
-		employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender, deptList));
+		try {
+			employeePayrollList.add(employeePayrollDBService.addEmpToPayroll(name, salary, start, gender, deptList));
+		} catch (EmpPayrollException | SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void remove(String name) throws EmpPayrollException {
