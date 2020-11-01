@@ -121,4 +121,22 @@ public class EmployeePayrollDBTest {
 		boolean result = empPayRollService.updateEmployeeSalaryInDB(Arrays.asList(arrOfEmps));
 		Assert.assertTrue(result);
 	}
+	
+	@Test
+	public void givenMultipleEmployee_WhenAddedWithThreads_ShouldMatchEntries() throws EmpPayrollException {
+	   List<String> deptList = new ArrayList<>();
+	   deptList.add("Sales");
+		EmployeePayrollData[] arrOfEmps = {
+				new EmployeePayrollData(0, "Jeff", 500.0, LocalDate.now(), "M", deptList),
+				new EmployeePayrollData(0, "Charlie", 400.0, LocalDate.now(), "M", deptList),
+				new EmployeePayrollData(0, "Tom", 300.0, LocalDate.now(), "M", deptList)
+		};
+		EmpPayrollService empPayRollService = new EmpPayrollService();
+		empPayRollService.readEmpPayrollData(IOService.DB_IO);
+		Instant threadStart = Instant.now();
+		empPayRollService.addEmpToPayrollWithThreads(Arrays.asList(arrOfEmps));
+		Instant threadEnd = Instant.now();
+		System.out.println("Duration with Thread : "+ Duration.between(threadStart, threadEnd));
+		Assert.assertEquals(4, empPayRollService.countEntries(IOService.DB_IO));
+	}
 }
