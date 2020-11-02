@@ -70,18 +70,22 @@ public class EmpPayrollService {
 			return new EmployeePayrollFileIOService().countEntries();
 		return employeePayrollList.size();
 	}
+	
+	public void updateEmployeeSalary(String name, double salary, IOService ioService) throws EmpPayrollException{
+		if(ioService.equals(IOService.DB_IO)) {
+			this.updateEmployeeSalary(name, salary);
+		}
+		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
+		if (employeePayrollData != null) employeePayrollData.setSalary(salary);
+	}
 
 	public void updateEmployeeSalary(String name, double salary) throws EmpPayrollException {
-		// TODO Auto-generated method stub
 		int result = employeePayrollDBService.updateEmployeeData(name, salary);
 		if (result == 0)
 			return;
-		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
-		if (employeePayrollData != null)
-			employeePayrollData.setSalary(salary);
 	}
 
-	private EmployeePayrollData getEmployeePayrollData(String name) {
+	public EmployeePayrollData getEmployeePayrollData(String name) {
 		return this.employeePayrollList.stream().filter(employee -> employee.getName().contentEquals(name)).findFirst()
 				.orElse(null);
 
