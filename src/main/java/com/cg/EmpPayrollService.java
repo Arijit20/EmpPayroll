@@ -70,19 +70,28 @@ public class EmpPayrollService {
 			return new EmployeePayrollFileIOService().countEntries();
 		return employeePayrollList.size();
 	}
-	
-	public void updateEmployeeSalary(String name, double salary, IOService ioService) throws EmpPayrollException{
-		if(ioService.equals(IOService.DB_IO)) {
+
+	public void updateEmployeeSalary(String name, double salary, IOService ioService) throws EmpPayrollException {
+		if (ioService.equals(IOService.DB_IO)) {
 			this.updateEmployeeSalary(name, salary);
 		}
 		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
-		if (employeePayrollData != null) employeePayrollData.setSalary(salary);
+		if (employeePayrollData != null)
+			employeePayrollData.setSalary(salary);
 	}
 
 	public void updateEmployeeSalary(String name, double salary) throws EmpPayrollException {
 		int result = employeePayrollDBService.updateEmployeeData(name, salary);
 		if (result == 0)
 			return;
+	}
+
+	public void deleteEmployee(String name, IOService ioService) {
+		EmployeePayrollData employeePayrollData = null;
+		if (ioService.equals(IOService.REST_IO)) {
+			employeePayrollData = this.getEmployeePayrollData(name);
+		}
+		employeePayrollList.remove(employeePayrollData);
 	}
 
 	public EmployeePayrollData getEmployeePayrollData(String name) {
@@ -123,12 +132,15 @@ public class EmpPayrollService {
 			return employeePayrollDBService.getAvgSalaryByGender();
 		return null;
 	}
-	
-	public void addEmployeeToPayroll(EmployeePayrollData employeePayrollData, IOService ioService) throws EmpPayrollException {
-		if(ioService.equals(IOService.DB_IO))
-			this.addEmpToPayroll(employeePayrollData.getName(), employeePayrollData.getSalary(), employeePayrollData.getStartDate(),
-					employeePayrollData.getGender(), employeePayrollData.getDeptList());
-		else employeePayrollList.add(employeePayrollData);
+
+	public void addEmployeeToPayroll(EmployeePayrollData employeePayrollData, IOService ioService)
+			throws EmpPayrollException {
+		if (ioService.equals(IOService.DB_IO))
+			this.addEmpToPayroll(employeePayrollData.getName(), employeePayrollData.getSalary(),
+					employeePayrollData.getStartDate(), employeePayrollData.getGender(),
+					employeePayrollData.getDeptList());
+		else
+			employeePayrollList.add(employeePayrollData);
 	}
 
 	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender, List<String> deptList)
@@ -194,7 +206,7 @@ public class EmpPayrollService {
 			Runnable task = () -> {
 				try {
 					employeePayrollDBService.updateEmployeeSalaryInDB(employeePayrollData.getName(),
-							                                          employeePayrollData.getSalary());
+							employeePayrollData.getSalary());
 				} catch (EmpPayrollException e) {
 					e.printStackTrace();
 				}
@@ -210,7 +222,8 @@ public class EmpPayrollService {
 				throw new EmpPayrollException(EmpPayrollException.ExceptionType.THREAD_INTERRUPTION, e.getMessage());
 			}
 		}
-		if(empUpdateStatus.containsValue(false))return false;
+		if (empUpdateStatus.containsValue(false))
+			return false;
 		return true;
 	}
 }
