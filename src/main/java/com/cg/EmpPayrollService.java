@@ -25,7 +25,7 @@ public class EmpPayrollService {
 
 	public EmpPayrollService(List<EmployeePayrollData> employeePayrollList) {
 		this();
-		this.employeePayrollList = employeePayrollList;
+		this.employeePayrollList = new ArrayList<>(employeePayrollList);
 	}
 
 	public void readEmployeePayrollData(IOService ioService) {
