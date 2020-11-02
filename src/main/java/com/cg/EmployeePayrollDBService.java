@@ -238,6 +238,7 @@ public class EmployeePayrollDBService {
 		return employeePayrollData;
 	}
 
+
 	public EmployeePayrollData addEmpToPayroll(String name, double salary, LocalDate start, String gender,
 			List<String> deptList) throws EmpPayrollException, SQLException {
 		Map<Integer, Boolean> statusMap = new HashMap<Integer, Boolean>();
@@ -263,54 +264,69 @@ public class EmployeePayrollDBService {
 			Thread empTableThread = new Thread(empTableTask);
 			empTableThread.start();
 
-			id = this.getEmpId(connection);
-
-			Runnable deptTableTask = () -> {
-				try {
-					this.addToDeptTable(id, deptList, connection);
-				} catch (EmpPayrollException e) {
-					e.printStackTrace();
-				}
-				statusMap.put(2, true);
-			};
-			Thread empDeptThread = new Thread(deptTableTask);
-			empDeptThread.start();
-
-			Runnable payrollTableTask = () -> {
-				try {
-					this.addToPayrollTable(id, salary, connection);
-				} catch (EmpPayrollException e) {
-					e.printStackTrace();
-				}
-				statusMap.put(3, true);
-			};
-			Thread payrollTableThread = new Thread(payrollTableTask);
-			payrollTableThread.start();
-
-			while (statusMap.containsValue(false)) {
+			while (statusMap.get(1) == false) {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
-				employeePayrollData = new EmployeePayrollData(id, name, salary, start, gender);
-			}
-		}
+				Runnable deptTableTask = () -> {
+					try {
+						this.addToDeptTable(name, deptList, connection);
+					} catch (EmpPayrollException e) {
+						e.printStackTrace();
+					}
+					statusMap.put(2, true);
+				};
+				Thread empDeptThread = new Thread(deptTableTask);
+				empDeptThread.start();
 
-		try {
-			connection.commit();
-		} catch (SQLException e) {
-			throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
-		} finally {
-			if (connection != null)
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+				while (statusMap.get(2) == false) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					Runnable payrollTableTask = () -> {
+						try {
+							this.addToPayrollTable(name, salary, connection);
+						} catch (EmpPayrollException e) {
+							e.printStackTrace();
+						}
+						statusMap.put(3, true);
+					};
+					Thread payrollTableThread = new Thread(payrollTableTask);
+					payrollTableThread.start();
+
+					while (statusMap.get(3) == false) {
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+
+					}
+					id = this.getEmpId(connection);
+					employeePayrollData = new EmployeePayrollData(id, name, salary, start, gender);
 				}
+			}
+
+			try {
+				connection.commit();
+			} catch (SQLException e) {
+				throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR, e.getMessage());
+			} finally {
+				if (connection != null)
+					try {
+						connection.close();
+					} catch (SQLException e) {
+						throw new EmpPayrollException(EmpPayrollException.ExceptionType.CONNECTION_ERROR,
+								e.getMessage());
+					}
+			}
+			return employeePayrollData;
 		}
-		return employeePayrollData;
 	}
 
 	private int getEmpId(Connection connection) throws EmpPayrollException {
@@ -347,9 +363,11 @@ public class EmployeePayrollDBService {
 		return 0;
 	}
 
-	private void addToDeptTable(int id, List<String> deptList, Connection connection) throws EmpPayrollException {
+	private void addToDeptTable(String name, List<String> deptList, Connection connection) throws EmpPayrollException {
 		try (Statement statement = connection.createStatement()) {
-			String sql = String.format("INSERT INTO employee_dept (id,dept) VALUES ('%s','%s');", id, deptList);
+			String sql = String.format(
+					"INSERT INTO employee_dept (id,dept) VALUES ((select id from employee_data where name='%s'),'%s');",
+					name, deptList);
 			statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -361,15 +379,15 @@ public class EmployeePayrollDBService {
 		}
 	}
 
-	private void addToPayrollTable(int id, double salary, Connection connection) throws EmpPayrollException {
+	private void addToPayrollTable(String name, double salary, Connection connection) throws EmpPayrollException {
 		try (Statement statement = connection.createStatement()) {
 			double deductions = salary * 0.2;
 			double taxablePay = salary - deductions;
 			double tax = taxablePay * 0.1;
 			double netPay = salary - tax;
 			String sql = String.format("INSERT INTO payroll_details "
-					+ "(id, basic_pay, deductions, taxable_pay, tax, net_pay) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')",
-					id, salary, deductions, taxablePay, tax, netPay);
+					+ "(id, basic_pay, deductions, taxable_pay, tax, net_pay) VALUES ((select id from employee_data where name='%s'), '%s', '%s', '%s', '%s', '%s')",
+					name, salary, deductions, taxablePay, tax, netPay);
 			statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			try {
