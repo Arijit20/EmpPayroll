@@ -119,6 +119,13 @@ public class EmpPayrollService {
 			return employeePayrollDBService.getAvgSalaryByGender();
 		return null;
 	}
+	
+	public void addEmployeeToPayroll(EmployeePayrollData employeePayrollData, IOService ioService) throws EmpPayrollException {
+		if(ioService.equals(IOService.DB_IO))
+			this.addEmpToPayroll(employeePayrollData.getName(), employeePayrollData.getSalary(), employeePayrollData.getStartDate(),
+					employeePayrollData.getGender(), employeePayrollData.getDeptList());
+		else employeePayrollList.add(employeePayrollData);
+	}
 
 	public void addEmpToPayroll(String name, double salary, LocalDate start, String gender, List<String> deptList)
 			throws EmpPayrollException {
