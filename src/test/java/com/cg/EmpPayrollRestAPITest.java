@@ -43,6 +43,14 @@ public class EmpPayrollRestAPITest {
 		return request.put("/employees/"+employeePayrollData.getId());
 	}
 	
+	private Response deleteEmployee(EmployeePayrollData employeePayrollData) {
+		String empJson = new Gson().toJson(employeePayrollData);
+		RequestSpecification request = RestAssured.given();
+		request.header("Content-Type", "application/json");
+		request.body(empJson);
+		return request.delete("/employees/"+employeePayrollData.getId());
+	}
+	
 	@Test
 	public void givenEmployeeDataInJsonServer_WhenRetrived_ShouldMatchCount() {
 		EmployeePayrollData[] arrOfEmp = getEmpList();
@@ -100,5 +108,21 @@ public class EmpPayrollRestAPITest {
 		Response response = updateEmployeeSalary(employeePayrollData);
 		int statusCode = response.getStatusCode();
 		Assert.assertEquals(200,statusCode);
+	}
+	
+	@Test
+	public void givenEmployeeData_WhenDeleted_ShouldMatch200Response() {
+		EmployeePayrollData[] arrOfEmp = getEmpList();
+		EmpPayrollService empPayrollService;
+		empPayrollService = new EmpPayrollService(Arrays.asList(arrOfEmp));
+		
+		EmployeePayrollData employeePayrollData = empPayrollService.getEmployeePayrollData("Nikhil");
+		Response response = deleteEmployee(employeePayrollData);
+		int statusCode = response.getStatusCode();
+		Assert.assertEquals(200,statusCode);
+		
+		empPayrollService.deleteEmployee("Nikhil",EmpPayrollService.IOService.REST_IO);
+		long entries = empPayrollService.countEntries(EmpPayrollService.IOService.REST_IO);
+		Assert.assertEquals(5, entries);
 	}
 }
